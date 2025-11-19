@@ -9,13 +9,13 @@ export const AIChat: React.FC = () => {
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
-  const [client, setClient] = useState<GoogleGenAI | null>(null);
   const [chatSession, setChatSession] = useState<Chat | null>(null);
 
   useEffect(() => {
-    if (import.meta.env.VITE_API_KEY) {
-      const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_API_KEY });
-      setClient(ai);
+    // Use VITE_API_KEY for local/Cloudflare environment
+    const apiKey = import.meta.env.VITE_API_KEY;
+    if (apiKey) {
+      const ai = new GoogleGenAI({ apiKey });
       const newChat = ai.chats.create({
         model: 'gemini-2.5-flash',
         config: {
@@ -93,7 +93,7 @@ export const AIChat: React.FC = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder={import.meta.env.VITE_API_KEY ? "Ask about the developer..." : "API Key Missing (Check ENV)"}
+          placeholder={import.meta.env.VITE_API_KEY ? "Ask about the developer..." : "API Key Missing (Check VITE_API_KEY)"}
           disabled={isLoading || !import.meta.env.VITE_API_KEY}
           className="flex-1 border border-[#7F9DB9] p-2 text-sm outline-none focus:border-blue-500 shadow-inner"
         />

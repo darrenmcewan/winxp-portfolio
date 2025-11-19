@@ -1,110 +1,212 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Send, Bot, User } from 'lucide-react';
-import { GoogleGenAI, Chat, GenerateContentResponse } from '@google/genai';
+import { useState } from 'react';
+import { FileText, Code, MessageSquare, Briefcase, Monitor, Mail } from 'lucide-react';
+import { AppType, type WindowState } from './types';
+import { WindowFrame } from './components/WindowFrame';
+import { Taskbar } from './components/Taskbar';
+import { StartMenu } from './components/StartMenu';
+import { Icon } from './components/Icon';
+import { Resume } from './apps/Resume';
+import { Projects } from './apps/Projects';
+import { AIChat } from './apps/AIChat';
+import { Email } from './apps/Email';
 
-export const AIChat: React.FC = () => {
-  const [messages, setMessages] = useState<{ role: 'user' | 'model'; text: string }[]>([
-    { role: 'model', text: "Hi! I'm your Portfolio Assistant. I can tell you about the developer, their skills, or just chat. I'm running on the new Gemini 2.5 Flash model!" }
-  ]);
-  const [input, setInput] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const chatEndRef = useRef<HTMLDivElement>(null);
-  const [chatSession, setChatSession] = useState<Chat | null>(null);
+// Initial State Generator
+const createInitialWindows = (): WindowState[] => [
+  {
+    id: 'resume-1',
+    type: AppType.RESUME,
+    title: 'Resume.pdf - Microsoft Word',
+    icon: <FileText className="text-blue-700" size={16} />,
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: 1,
+    position: { x: 50, y: 50 },
+    size: { width: 700, height: 600 }
+  },
+  {
+    id: 'projects-1',
+    type: AppType.PROJECTS,
+    title: 'My Projects',
+    icon: <Code className="text-green-600" size={16} />,
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: 2,
+    position: { x: 100, y: 80 },
+    size: { width: 800, height: 500 }
+  },
+  {
+    id: 'chat-1',
+    type: AppType.AI_CHAT,
+    title: 'AI Assistant (Gemini)',
+    icon: <MessageSquare className="text-purple-600" size={16} />,
+    isOpen: true, // Auto open chat
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: 3,
+    position: { x: 200, y: 150 },
+    size: { width: 400, height: 500 }
+  },
+  {
+    id: 'browser-1',
+    type: AppType.BROWSER,
+    title: 'Internet Explorer',
+    icon: <Briefcase className="text-blue-400" size={16} />,
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: true,
+    zIndex: 4,
+    position: { x: 0, y: 0 },
+    size: { width: 800, height: 600 }
+  },
+  {
+    id: 'email-1',
+    type: AppType.EMAIL,
+    title: 'New Message',
+    icon: <Mail className="text-blue-600" size={16} />,
+    isOpen: false,
+    isMinimized: false,
+    isMaximized: false,
+    zIndex: 5,
+    position: { x: 150, y: 100 },
+    size: { width: 600, height: 450 }
+  }
+];
 
-  useEffect(() => {
-    // Use VITE_API_KEY for local/Cloudflare environment
-    const apiKey = import.meta.env.VITE_API_KEY;
-    if (apiKey) {
-      const ai = new GoogleGenAI({ apiKey });
-      const newChat = ai.chats.create({
-        model: 'gemini-2.5-flash',
-        config: {
-          systemInstruction: "You are a helpful assistant inside a Windows XP themed portfolio website. Keep your answers concise, friendly, and sometimes make 2001-era computer references (like Clippy, dial-up, floppy disks).",
-        },
-      });
-      setChatSession(newChat);
-    }
-  }, []);
+export default function App() {
+  const [windows, setWindows] = useState<WindowState[]>(createInitialWindows());
+  const [activeWindowId, setActiveWindowId] = useState<string | null>('chat-1');
+  const [isStartOpen, setIsStartOpen] = useState(false);
+  const [highestZ, setHighestZ] = useState(10);
 
-  const scrollToBottom = () => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  const bringToFront = (id: string) => {
+    setActiveWindowId(id);
+    setWindows(prev => prev.map(w => {
+      if (w.id === id) {
+        return { ...w, zIndex: highestZ + 1, isMinimized: false };
+      }
+      return w;
+    }));
+    setHighestZ(prev => prev + 1);
   };
 
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
+  const handleOpenApp = (type: AppType) => {
+    const existing = windows.find(w => w.type === type);
+    if (existing) {
+      setWindows(prev => prev.map(w => 
+        w.id === existing.id ? { ...w, isOpen: true, isMinimized: false, zIndex: highestZ + 1 } : w
+      ));
+      setActiveWindowId(existing.id);
+      setHighestZ(prev => prev + 1);
+    } else {
+      // Logic to create new instance if allowing multiple (skipped for simplicity)
+    }
+  };
 
-  const handleSend = async () => {
-    if (!input.trim() || !chatSession) return;
+  const updateWindow = (id: string, changes: Partial<WindowState>) => {
+    setWindows(prev => prev.map(w => w.id === id ? { ...w, ...changes } : w));
+  };
 
-    const userMsg = input;
-    setInput('');
-    setMessages(prev => [...prev, { role: 'user', text: userMsg }]);
-    setIsLoading(true);
-
-    try {
-      const result = await chatSession.sendMessageStream({ message: userMsg });
-      
-      let fullResponse = "";
-      setMessages(prev => [...prev, { role: 'model', text: "" }]); // Placeholder
-
-      for await (const chunk of result) {
-        const c = chunk as GenerateContentResponse;
-        const text = c.text || "";
-        fullResponse += text;
-        
-        setMessages(prev => {
-          const newHistory = [...prev];
-          newHistory[newHistory.length - 1].text = fullResponse;
-          return newHistory;
-        });
-      }
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'model', text: "Error: Could not connect to Gemini API. Please check your connection." }]);
-    } finally {
-      setIsLoading(false);
+  const renderAppContent = (type: AppType) => {
+    switch (type) {
+      case AppType.RESUME: return <Resume />;
+      case AppType.PROJECTS: return <Projects />;
+      case AppType.AI_CHAT: return <AIChat />;
+      case AppType.EMAIL: return <Email />;
+      case AppType.BROWSER: return (
+        <div className="w-full h-full flex flex-col bg-white">
+          <div className="border-b p-2 bg-gray-100 text-xs">Address: http://www.google.com</div>
+          <iframe src="https://www.google.com/webhp?igu=1" className="flex-1 w-full h-full border-none" title="browser" />
+        </div>
+      );
+      default: return <div className="p-4">Content not found</div>;
     }
   };
 
   return (
-    <div className="flex flex-col h-full bg-white">
-      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-white font-sans">
-        {messages.map((msg, idx) => (
-          <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`flex items-start max-w-[80%] ${msg.role === 'user' ? 'flex-row-reverse' : 'flex-row'}`}>
-              <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 ${msg.role === 'user' ? 'bg-blue-100 ml-2' : 'bg-purple-100 mr-2'}`}>
-                {msg.role === 'user' ? <User size={16} className="text-blue-600" /> : <Bot size={16} className="text-purple-600" />}
-              </div>
-              <div className={`p-3 rounded-lg text-sm ${
-                msg.role === 'user' 
-                  ? 'bg-blue-50 border border-blue-200 text-blue-900 rounded-tr-none' 
-                  : 'bg-purple-50 border border-purple-200 text-purple-900 rounded-tl-none'
-              }`}>
-                {msg.text}
-              </div>
-            </div>
-          </div>
-        ))}
-        <div ref={chatEndRef} />
-      </div>
-      <div className="bg-[#ECE9D8] p-2 border-t border-[#D1CEBD] flex gap-2">
-        <input
-          type="text"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder={import.meta.env.VITE_API_KEY ? "Ask about the developer..." : "API Key Missing (Check VITE_API_KEY)"}
-          disabled={isLoading || !import.meta.env.VITE_API_KEY}
-          className="flex-1 border border-[#7F9DB9] p-2 text-sm outline-none focus:border-blue-500 shadow-inner"
+    <div 
+      className="w-screen h-screen overflow-hidden relative font-tahoma"
+      style={{
+        backgroundImage: `url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?ixlib=rb-4.0.3&auto=format&fit=crop&w=2070&q=80')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+      onClick={() => {
+        if (isStartOpen) setIsStartOpen(false);
+      }}
+    >
+      {/* Desktop Icons */}
+      <div className="absolute top-4 left-4 flex flex-col gap-4 z-0">
+        <Icon 
+          label="My Computer" 
+          icon={<Monitor size={32} className="text-blue-200 fill-blue-600" />} 
+          onClick={() => handleOpenApp(AppType.PROJECTS)} 
         />
-        <button 
-          onClick={handleSend}
-          disabled={isLoading || !import.meta.env.VITE_API_KEY}
-          className="bg-gradient-to-b from-[#F8F8F8] to-[#DCDAD3] border border-[#989898] hover:brightness-105 px-4 rounded-[2px] flex items-center active:translate-y-[1px]"
-        >
-          <Send size={16} className="text-gray-600" />
-        </button>
+        <Icon 
+          label="My Projects" 
+          icon={<Code size={32} className="text-green-400 fill-green-700" />} 
+          onClick={() => handleOpenApp(AppType.PROJECTS)} 
+        />
+        <Icon 
+          label="Resume.pdf" 
+          icon={<FileText size={32} className="text-white fill-red-600" />} 
+          onClick={() => handleOpenApp(AppType.RESUME)} 
+        />
+        <Icon 
+          label="Internet" 
+          icon={<Briefcase size={32} className="text-blue-300 fill-blue-500" />} 
+          onClick={() => handleOpenApp(AppType.BROWSER)} 
+        />
+        <Icon 
+          label="E-mail" 
+          icon={<Mail size={32} className="text-blue-200 fill-blue-600" />} 
+          onClick={() => handleOpenApp(AppType.EMAIL)} 
+        />
+         <Icon 
+          label="Chat Assistant" 
+          icon={<MessageSquare size={32} className="text-purple-300 fill-purple-600" />} 
+          onClick={() => handleOpenApp(AppType.AI_CHAT)} 
+        />
       </div>
+
+      {/* Windows */}
+      {windows.map(win => (
+        <WindowFrame
+          key={win.id}
+          {...win}
+          onClose={() => updateWindow(win.id, { isOpen: false })}
+          onMinimize={() => updateWindow(win.id, { isMinimized: true })}
+          onMaximize={() => updateWindow(win.id, { isMaximized: !win.isMaximized })}
+          onFocus={() => bringToFront(win.id)}
+          onMove={(x, y) => updateWindow(win.id, { position: { x, y } })}
+        >
+          {renderAppContent(win.type)}
+        </WindowFrame>
+      ))}
+
+      {/* Start Menu */}
+      <StartMenu 
+        isOpen={isStartOpen} 
+        onClose={() => setIsStartOpen(false)}
+        onOpenApp={handleOpenApp}
+      />
+
+      {/* Taskbar */}
+      <Taskbar 
+        windows={windows} 
+        activeId={activeWindowId}
+        isStartOpen={isStartOpen}
+        onToggleStart={() => setIsStartOpen(!isStartOpen)}
+        onWindowClick={(id) => {
+          const win = windows.find(w => w.id === id);
+          if (win?.isMinimized || activeWindowId !== id) {
+            bringToFront(id);
+          } else {
+            updateWindow(id, { isMinimized: true });
+          }
+        }}
+      />
     </div>
   );
-};
+}
