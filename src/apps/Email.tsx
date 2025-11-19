@@ -6,7 +6,7 @@ export const Email: React.FC = () => {
   const [body, setBody] = useState('');
 
   const handleSend = () => {
-    const email = "john.doe@example.com"; // Placeholder
+    const email = "darren@mcewan.me"; // Placeholder
     const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(mailtoLink, '_blank');
   };
@@ -52,7 +52,7 @@ export const Email: React.FC = () => {
             <div className="flex-1 border-b border-[#D4D0C8] px-1 py-0.5 flex items-center">
                 <span className="bg-[#E3EFFF] px-1 border border-[#7F9DB9] text-black flex items-center gap-1 rounded-[2px] cursor-default">
                    <span className="w-3 h-3 rounded-full bg-blue-500 border border-blue-700 flex items-center justify-center text-white text-[8px] mr-1">J</span>
-                   John Doe 
+                   Darren McEwan
                    <X size={10} className="cursor-pointer ml-1 hover:text-red-500"/>
                 </span>
             </div>
