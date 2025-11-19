@@ -12,7 +12,6 @@ export const AIChat: React.FC = () => {
   const [chatSession, setChatSession] = useState<Chat | null>(null);
 
   useEffect(() => {
-    // Use process.env.API_KEY as per guidelines
     const apiKey = process.env.API_KEY;
     if (apiKey) {
       const ai = new GoogleGenAI({ apiKey });
@@ -46,7 +45,7 @@ export const AIChat: React.FC = () => {
       const result = await chatSession.sendMessageStream({ message: userMsg });
       
       let fullResponse = "";
-      setMessages(prev => [...prev, { role: 'model', text: "" }]); // Placeholder
+      setMessages(prev => [...prev, { role: 'model', text: "" }]);
 
       for await (const chunk of result) {
         const c = chunk as GenerateContentResponse;
