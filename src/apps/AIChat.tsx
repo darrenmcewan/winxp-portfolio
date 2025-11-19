@@ -92,13 +92,13 @@ export const AIChat: React.FC = () => {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-          placeholder={process.env.API_KEY ? "Ask about the developer..." : "API Key Missing (Check process.env.API_KEY)"}
-          disabled={isLoading || !process.env.API_KEY}
+          placeholder={import.meta.env.VITE_API_KEY ? "Ask about the developer..." : "API Key Missing (Check process.env.API_KEY)"}
+          disabled={isLoading || !import.meta.env.VITE_API_KEY}
           className="flex-1 border border-[#7F9DB9] p-2 text-sm outline-none focus:border-blue-500 shadow-inner"
         />
         <button 
           onClick={handleSend}
-          disabled={isLoading || !process.env.API_KEY}
+          disabled={isLoading || !import.meta.env.VITE_API_KEY}
           className="bg-gradient-to-b from-[#F8F8F8] to-[#DCDAD3] border border-[#989898] hover:brightness-105 px-4 rounded-[2px] flex items-center active:translate-y-[1px]"
         >
           <Send size={16} className="text-gray-600" />

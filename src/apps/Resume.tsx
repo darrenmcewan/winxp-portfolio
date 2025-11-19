@@ -3,7 +3,7 @@ import React from 'react';
 export const Resume: React.FC = () => {
   return (
     <div className="w-full h-full bg-[#525659] flex justify-center overflow-y-auto p-8">
-      <div className="bg-white w-full max-w-[800px] min-h-[1000px] shadow-lg p-12 text-black font-serif">
+      <div className="bg-white w-full max-w-[800px] shadow-lg p-12 text-black font-serif">
         <h1 className="text-4xl font-bold border-b-2 border-gray-800 pb-4 mb-8">Darren McEwan</h1>
         
         <div className="mb-8">
