@@ -1,11 +1,13 @@
-export enum AppType {
-  RESUME = 'RESUME',
-  PROJECTS = 'PROJECTS',
-  ABOUT = 'ABOUT',
-  AI_CHAT = 'AI_CHAT',
-  BROWSER = 'BROWSER',
-  EMAIL = 'EMAIL'
-}
+export const AppType = {
+  RESUME: 'RESUME',
+  PROJECTS: 'PROJECTS',
+  ABOUT: 'ABOUT',
+  AI_CHAT: 'AI_CHAT',
+  BROWSER: 'BROWSER',
+  EMAIL: 'EMAIL'
+} as const;
+
+export type AppType = typeof AppType[keyof typeof AppType];
 
 export interface WindowState {
   id: string;

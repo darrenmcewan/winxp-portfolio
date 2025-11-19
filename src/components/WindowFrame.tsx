@@ -20,7 +20,7 @@ interface WindowFrameProps {
 }
 
 export const WindowFrame: React.FC<WindowFrameProps> = ({
-  id, title, icon, isOpen, isMinimized, isMaximized, zIndex, position, size,
+  title, icon, isOpen, isMinimized, isMaximized, zIndex, position, size,
   onClose, onMinimize, onMaximize, onFocus, onMove, children
 }) => {
   const [isDragging, setIsDragging] = useState(false);

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Send, Paperclip, X, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight, List } from 'lucide-react';
+import { Send, Paperclip, X, Bold, Italic, Underline, AlignLeft, AlignCenter, AlignRight } from 'lucide-react';
 
 export const Email: React.FC = () => {
   const [subject, setSubject] = useState('');

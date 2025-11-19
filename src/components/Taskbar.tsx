@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { WindowState } from '../types';
+import type { WindowState } from '../types';
 
 interface TaskbarProps {
   windows: WindowState[];

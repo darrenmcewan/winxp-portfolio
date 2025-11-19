@@ -12,7 +12,7 @@ export const Icon: React.FC<IconProps> = ({ label, icon, onClick }) => {
       className="flex flex-col items-center w-24 p-2 cursor-pointer group hover:bg-blue-700/30 rounded transition-colors duration-100 border border-transparent hover:border-blue-500/30"
       onDoubleClick={onClick}
       // Mobile support
-      onClick={(e) => {
+      onClick={() => {
         if (window.innerWidth < 768) onClick();
       }}
     >
