@@ -1,4 +1,4 @@
-import React from 'react';
+import type { ReactNode } from 'react';
 
 export const AppType = {
   RESUME: 'RESUME',
@@ -15,7 +15,7 @@ export interface WindowState {
   id: string;
   type: AppType;
   title: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   isOpen: boolean;
   isMinimized: boolean;
   isMaximized: boolean;
@@ -26,6 +26,6 @@ export interface WindowState {
 
 export interface DesktopIconProps {
   label: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   onClick: () => void;
 }

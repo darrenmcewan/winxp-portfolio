@@ -107,4 +107,4 @@ export const AIChat: React.FC = () => {
       </div>
     </div>
   );
-};
+}
