@@ -116,8 +116,8 @@ export default function App() {
       case AppType.EMAIL: return <Email />;
       case AppType.BROWSER: return (
         <div className="w-full h-full flex flex-col bg-white">
-          <div className="border-b p-2 bg-gray-100 text-xs">Address: http://www.google.com</div>
-          <iframe src="https://www.google.com/webhp?igu=1" className="flex-1 w-full h-full border-none" title="browser" />
+          <div className="border-b p-2 bg-gray-100 text-xs">Address: https://www.linkedin.com/in/darren-mcewan/</div>
+          <iframe src="https://www.linkedin.com/in/darren-mcewan/" className="flex-1 w-full h-full border-none" title="browser" />
         </div>
       );
       default: return <div className="p-4">Content not found</div>;
